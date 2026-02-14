@@ -5,8 +5,6 @@ import sys
 
 # Input to select model 1
 
-
-
 if sys.prefix == sys.base_prefix:
     print("Virtual environment is not active. To activate launch startVirtual or createVirtual!")
     exit(1)
