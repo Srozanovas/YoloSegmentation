@@ -129,7 +129,7 @@ def getDeviceName():
 
     device = selectionInput(allDevices)
 
-    if device == 0: 
+    if device == 1: 
         return "cpu"
     else :
         return "cuda"
