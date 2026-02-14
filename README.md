@@ -6,7 +6,7 @@ For first time use launch createVirtual in cmd. This will create virtual environ
 To launch project: 
 - Select Python interpreter: 
 
-![interpreter](images/interpreter.png)
+![interpreter](Images/interpreter.png)
 - In cmd type startVirtual if it is not started already. 
 - Launch main.py
 
