@@ -28,5 +28,10 @@ If everything is good in terminal you should see every frame information and in 
 
 ![selection1](Images/result2.png)
 
+# Results
+Added testbench.py for easy testbench for all networks. Put yout video into input, and testbench will run through video with all networks and versions and save json files with number of persons and average fps. Also added converter from JSON to CSV to convert all JSONS into one big table for graphs. 
+
+
+
 
 
