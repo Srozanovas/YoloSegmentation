@@ -3,7 +3,9 @@ import time
 import cv2
 import models as m
 from collections import deque
-
+import json
+import os
+import output as o 
 
 
 
@@ -12,32 +14,43 @@ from collections import deque
 
 
 
-def launchYolo(model, network, networkVersion):
+def launchYolo(model, network, networkVersion, videoPath, deviceName, outputPath = 0):
 
     #Atvaizdavimo langas
     windowName = m.getWindowName(network, networkVersion) 
     cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
     cv2.resizeWindow(windowName, 1080, 720)
 
-    #Gauname video vieta ir CPU ar GPU naudosime 
-    videoPath = m.getVideoSource()
-    deviceName = m.getDeviceName()
+    if outputPath:  
+        os.makedirs(os.path.dirname(outputPath) or ".", exist_ok=True)
 
+    [rec, key] = o.WriteOutputNetworkAndVersion(network, networkVersion)
+
+    rec[key]["device"] = "CPU" if deviceName == "cpu" else "GPU"
+
+    print(outputPath) 
 
     #FPS kintamieji 
     prev_time = 0
     N = 30
     dt_hist = deque(maxlen=N)
     prev = time.perf_counter()
+    frameJsonArray = []
 
     
-    for r in model(0 if videoPath == "webCam" else videoPath, stream=True, device=deviceName, imgsz=480, vid_stride=1, classes = 0):
+    for idx, r in enumerate(model(0 if videoPath == "webCam" else videoPath, stream=True, device=deviceName, imgsz=480, vid_stride=1, classes = 0)):
         frame = r.plot()  # nupiešia box'us + maskes ant kadro
+
+        num_persons = len(r.boxes) if r.boxes is not None else 0
+        frameInfo = {"id" : idx, "NoP" : num_persons}
+        frameJsonArray.append(frameInfo)
+
 
         #FPS SKAICIAVIMAS
         now = time.perf_counter()
         dt = now - prev
         prev = now
+
 
         dt_hist.append(dt)
         avg_dt = sum(dt_hist) / len(dt_hist)
@@ -47,6 +60,7 @@ def launchYolo(model, network, networkVersion):
         fps = 1 / (current_time - prev_time) if prev_time != 0 else 0
         prev_time = current_time
 
+
         cv2.putText(frame, f"FPS: {fps:.2f}", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         cv2.putText(frame, f"Average FPS: {avg_fps:.2f}", (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
@@ -54,6 +68,11 @@ def launchYolo(model, network, networkVersion):
         # q - uždaryti
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+    if not outputPath: 
+        cv2.waitKey(0)     
+    rec[key]["AVG fps"] = avg_fps
+    rec[key]["frames"] = frameJsonArray
+    with open(outputPath, "w") as f:
+        f.write(json.dumps(rec, ensure_ascii=False) + "\n")  
 
-    cv2.waitKey(0)        
     cv2.destroyAllWindows()

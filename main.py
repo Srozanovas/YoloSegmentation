@@ -10,11 +10,13 @@ if sys.prefix == sys.base_prefix:
     exit(1)
 
 #Select network 
-[model, network, networkVersion] = m.getModel()
+[model, network, networkVersion, videoPath, deviceName] = m.getModel()
 
 #launch yolo network 
-y.launchYolo(model, network, networkVersion)
+y.launchYolo(model, network, networkVersion, videoPath, deviceName)
 
+
+#m.getAllModels()
 
 
 

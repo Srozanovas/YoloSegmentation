@@ -1,3 +1,5 @@
+#This file contains all functions for getting models, their names, outputPaths for json etc.
+
 from ultralytics import YOLO
 import torch
 import os
@@ -64,7 +66,7 @@ def getWindowName(network, networkVersion):
     match network: 
         case 1: name += "YOLOV8"
         case 2: name += "YOLOV11"
-        case 2: name += "YOLOV26"
+        case 3: name += "YOLOV26"
 
     match networkVersion: 
         case 1: name += "N segmentation"
@@ -95,7 +97,12 @@ def getModel():
     networkPath = getPath(network, networkVersion)
     model = YOLO(networkPath)
 
-    return [model, network, networkVersion]
+
+    #Gauname video vieta ir CPU ar GPU naudosime 
+    videoPath = getVideoSource()
+    deviceName = getDeviceName()
+
+    return [model, network, networkVersion, videoPath, deviceName]
 
 def getVideoSource(): 
     folder_path = "Input"
@@ -133,4 +140,34 @@ def getDeviceName():
         return "cpu"
     else :
         return "cuda"
-  
+    
+
+
+def getAllModels():
+    maxModels = 3; 
+    maxVersions = 5; 
+    for network in range (1, maxModels + 1):
+        for networkVersion in range(1, maxVersions + 1) : 
+            networkPath = getPath(network, networkVersion)
+            model = YOLO(networkPath)
+
+
+def getOutputPaths(network, networkVersion, device): 
+    name = "Output/"
+    match network: 
+        case 1: name += "YOLOV8/"
+        case 2: name += "YOLOV11/"
+        case 3: name += "YOLOV26/"
+
+    match networkVersion: 
+        case 1: name += "Nseg"
+        case 2: name += "Sseg"
+        case 3: name += "Mseg"
+        case 4: name += "Lseg"
+        case 5: name += "Xseg"
+    match device: 
+        case "cpu": name += "CPU.json"
+        case "cuda": name += "GPU.json"
+
+    return name
+
